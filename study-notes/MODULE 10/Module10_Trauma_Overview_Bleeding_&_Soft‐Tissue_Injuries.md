@@ -1,4 +1,4 @@
-# Module 10: Trauma Overview: Bleeding & Soft‐Tissue Injuries
+# Module 10: Trauma Overview Bleeding & Soft‐Tissue Injuries
 
 ---
 
