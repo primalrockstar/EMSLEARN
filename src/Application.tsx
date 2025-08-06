@@ -1,14 +1,11 @@
 ﻿import React, { useState, useEffect } from 'react'
-import { Home, Calculator, FileText, Pill, BookOpen, ChevronRight, ArrowLeft, Clock, AlertCircle, Search, Filter } from 'lucide-react'
+import { Home, Calculator, FileText, Pill, BookOpen, ChevronRight, ArrowLeft, Clock, AlertCircle, Target, Users, Settings, Award, ExternalLink } from 'lucide-react'
 
 function Application() {
   const [currentPage, setCurrentPage] = useState('home')
   const [chapters, setChapters] = useState([])
   const [selectedChapter, setSelectedChapter] = useState(null)
-  const [selectedMedication, setSelectedMedication] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [medicationSearch, setMedicationSearch] = useState('')
-  const [medicationFilter, setMedicationFilter] = useState('all')
 
   const navigationItems = [
     { id: 'home', name: 'Dashboard', icon: Home },
@@ -16,200 +13,6 @@ function Application() {
     { id: 'calculators', name: 'Calculators', icon: Calculator },
     { id: 'protocols', name: 'Protocols', icon: FileText },
     { id: 'medications', name: 'Medications', icon: Pill }
-  ]
-
-  // Comprehensive medications database
-  const medications = [
-    {
-      id: 1,
-      name: "Epinephrine",
-      genericName: "Epinephrine",
-      brandNames: ["EpiPen", "Adrenalin"],
-      classification: "Sympathomimetic",
-      scope: "EMT-B",
-      mechanism: "Alpha and beta adrenergic agonist",
-      indications: ["Anaphylaxis", "Severe asthma", "Cardiac arrest"],
-      contraindications: ["Hypertensive crisis", "Coronary artery disease (relative)"],
-      dosage: {
-        adult: "0.3-0.5 mg IM (1:1000) or 1 mg IV (1:10,000)",
-        pediatric: "0.01 mg/kg IM (1:1000) or 0.01 mg/kg IV (1:10,000)"
-      },
-      route: ["IM", "IV", "Endotracheal"],
-      onsetDuration: "Onset: 1-2 min IM, immediate IV. Duration: 5-10 min",
-      sideEffects: ["Tachycardia", "Hypertension", "Anxiety", "Tremor"],
-      considerations: "Monitor for arrhythmias. May repeat every 3-5 minutes."
-    },
-    {
-      id: 2,
-      name: "Albuterol",
-      genericName: "Albuterol Sulfate",
-      brandNames: ["Proventil", "Ventolin"],
-      classification: "Beta-2 Agonist Bronchodilator",
-      scope: "EMT-B",
-      mechanism: "Selective beta-2 adrenergic receptor agonist causing bronchodilation",
-      indications: ["Asthma", "COPD exacerbation", "Bronchospasm"],
-      contraindications: ["Hypersensitivity to albuterol"],
-      dosage: {
-        adult: "2.5 mg in 3 mL normal saline via nebulizer",
-        pediatric: "2.5 mg in 3 mL normal saline via nebulizer"
-      },
-      route: ["Inhalation", "Nebulizer"],
-      onsetDuration: "Onset: 5-15 min. Duration: 3-6 hours",
-      sideEffects: ["Tachycardia", "Tremor", "Nervousness", "Headache"],
-      considerations: "Monitor heart rate. May cause paradoxical bronchospasm."
-    },
-    {
-      id: 3,
-      name: "Nitroglycerin",
-      genericName: "Nitroglycerin",
-      brandNames: ["Nitrostat", "Nitrolingual"],
-      classification: "Nitrate Vasodilator",
-      scope: "EMT-B",
-      mechanism: "Venous and arterial vasodilation, reduces preload and afterload",
-      indications: ["Chest pain", "Angina", "CHF with pulmonary edema"],
-      contraindications: ["Hypotension", "Head injury", "Viagra/Cialis use within 24-48 hours"],
-      dosage: {
-        adult: "0.4 mg SL, may repeat every 3-5 minutes up to 3 doses",
-        pediatric: "Not typically used in pediatric patients"
-      },
-      route: ["Sublingual", "Spray"],
-      onsetDuration: "Onset: 1-3 min. Duration: 30-60 min",
-      sideEffects: ["Hypotension", "Headache", "Dizziness", "Flushing"],
-      considerations: "Check BP before each dose. Patient must be sitting or lying down."
-    },
-    {
-      id: 4,
-      name: "Aspirin",
-      genericName: "Acetylsalicylic Acid",
-      brandNames: ["Bayer", "Ecotrin"],
-      classification: "Antiplatelet Agent/NSAID",
-      scope: "EMT-B",
-      mechanism: "Irreversibly inhibits platelet aggregation and cyclooxygenase",
-      indications: ["Chest pain (suspected MI)", "Stroke prevention"],
-      contraindications: ["Allergy to aspirin", "Active bleeding", "Severe asthma"],
-      dosage: {
-        adult: "160-325 mg PO (chewed)",
-        pediatric: "Not recommended for children due to Reye's syndrome risk"
-      },
-      route: ["Oral"],
-      onsetDuration: "Onset: 15-30 min. Duration: 4-6 hours (antiplatelet effect lasts days)",
-      sideEffects: ["GI bleeding", "Tinnitus", "Allergic reactions"],
-      considerations: "Have patient chew for faster absorption. Contraindicated in children."
-    },
-    {
-      id: 5,
-      name: "Oral Glucose",
-      genericName: "Glucose",
-      brandNames: ["Glutose", "Insta-Glucose"],
-      classification: "Carbohydrate/Antihypoglycemic",
-      scope: "EMT-B",
-      mechanism: "Rapidly absorbed simple carbohydrate that raises blood glucose",
-      indications: ["Hypoglycemia in conscious patients"],
-      contraindications: ["Unconscious patient", "Unable to swallow"],
-      dosage: {
-        adult: "15-20 grams PO",
-        pediatric: "15-20 grams PO"
-      },
-      route: ["Oral"],
-      onsetDuration: "Onset: 10-15 min. Duration: Variable",
-      sideEffects: ["Nausea", "Vomiting"],
-      considerations: "Patient must be conscious and able to swallow. Monitor blood glucose."
-    },
-    {
-      id: 6,
-      name: "Activated Charcoal",
-      genericName: "Activated Charcoal",
-      brandNames: ["Actidose", "CharcoAid"],
-      classification: "Antidote/Adsorbent",
-      scope: "EMT-B",
-      mechanism: "Adsorbs toxins in the GI tract preventing absorption",
-      indications: ["Poisoning/overdose (specific substances)"],
-      contraindications: ["Altered mental status", "Caustic ingestion", "Hydrocarbon ingestion"],
-      dosage: {
-        adult: "25-50 grams PO",
-        pediatric: "1 gram/kg PO"
-      },
-      route: ["Oral"],
-      onsetDuration: "Onset: Immediate in GI tract. Duration: Until eliminated",
-      sideEffects: ["Constipation", "Black stools", "Vomiting"],
-      considerations: "Most effective within 1 hour of ingestion. May require multiple doses."
-    },
-    {
-      id: 7,
-      name: "Oxygen",
-      genericName: "Oxygen",
-      brandNames: ["Medical Oxygen"],
-      classification: "Gas/Respiratory Therapy",
-      scope: "EMT-B",
-      mechanism: "Increases oxygen content in blood and tissues",
-      indications: ["Hypoxia", "Respiratory distress", "Chest pain", "Shock"],
-      contraindications: ["None in emergency settings"],
-      dosage: {
-        adult: "2-15 LPM depending on delivery device",
-        pediatric: "2-15 LPM depending on delivery device"
-      },
-      route: ["Inhalation"],
-      onsetDuration: "Onset: Immediate. Duration: As long as administered",
-      sideEffects: ["Oxygen toxicity (prolonged high concentrations)", "Drying of mucous membranes"],
-      considerations: "Use pulse oximetry to guide therapy. Humidify for prolonged use."
-    },
-    {
-      id: 8,
-      name: "Naloxone",
-      genericName: "Naloxone HCl",
-      brandNames: ["Narcan", "Evzio"],
-      classification: "Opioid Antagonist",
-      scope: "EMT-B",
-      mechanism: "Competitive opioid receptor antagonist",
-      indications: ["Opioid overdose", "Respiratory depression from opioids"],
-      contraindications: ["Hypersensitivity to naloxone"],
-      dosage: {
-        adult: "0.4-2 mg IV/IM/IN, may repeat every 2-3 minutes",
-        pediatric: "0.1 mg/kg IV/IM/IN, may repeat every 2-3 minutes"
-      },
-      route: ["IV", "IM", "Intranasal", "Endotracheal"],
-      onsetDuration: "Onset: 1-2 min IV, 2-5 min IM/IN. Duration: 30-90 min",
-      sideEffects: ["Withdrawal symptoms", "Agitation", "Nausea", "Vomiting"],
-      considerations: "May precipitate withdrawal in opioid-dependent patients. Effects may wear off before opioid."
-    },
-    {
-      id: 9,
-      name: "Diphenhydramine",
-      genericName: "Diphenhydramine HCl",
-      brandNames: ["Benadryl"],
-      classification: "Antihistamine",
-      scope: "AEMT",
-      mechanism: "H1 receptor antagonist with anticholinergic effects",
-      indications: ["Allergic reactions", "Anaphylaxis (adjunct)", "Extrapyramidal reactions"],
-      contraindications: ["Acute asthma", "MAO inhibitor use", "Narrow-angle glaucoma"],
-      dosage: {
-        adult: "25-50 mg IV/IM",
-        pediatric: "1 mg/kg IV/IM (max 50 mg)"
-      },
-      route: ["IV", "IM", "PO"],
-      onsetDuration: "Onset: 15-30 min. Duration: 4-6 hours",
-      sideEffects: ["Sedation", "Dry mouth", "Urinary retention", "Confusion"],
-      considerations: "May cause significant sedation in elderly. Use caution with anticholinergic drugs."
-    },
-    {
-      id: 10,
-      name: "Dextrose 50%",
-      genericName: "Dextrose",
-      brandNames: ["D50W"],
-      classification: "Carbohydrate/Antihypoglycemic",
-      scope: "AEMT",
-      mechanism: "Rapidly increases blood glucose concentration",
-      indications: ["Severe hypoglycemia", "Altered mental status with hypoglycemia"],
-      contraindications: ["Intracranial hemorrhage (relative)"],
-      dosage: {
-        adult: "25 grams (50 mL of 50% solution) IV",
-        pediatric: "0.5-1 gram/kg IV (2-4 mL/kg of 25% solution in children)"
-      },
-      route: ["IV"],
-      onsetDuration: "Onset: 1-3 min. Duration: Variable",
-      sideEffects: ["Tissue necrosis if extravasated", "Hyperglycemia"],
-      considerations: "Ensure IV patency. May use D25 or D10 in children. Monitor blood glucose."
-    }
   ]
 
   useEffect(() => {
@@ -245,93 +48,6 @@ function Application() {
     loadChapters()
   }, [])
 
-  // Filter medications based on search and scope
-  const filteredMedications = medications.filter(med => {
-    const matchesSearch = med.name.toLowerCase().includes(medicationSearch.toLowerCase()) ||
-                         med.classification.toLowerCase().includes(medicationSearch.toLowerCase()) ||
-                         med.indications.some(indication => indication.toLowerCase().includes(medicationSearch.toLowerCase()))
-    
-    const matchesFilter = medicationFilter === 'all' || med.scope === medicationFilter
-    
-    return matchesSearch && matchesFilter
-  })
-
-  // Extract key terms from content
-  const extractKeyTerms = (content) => {
-    if (!content || typeof content !== 'string') return []
-    
-    const keyTerms = new Set()
-    const medicalTerms = content.match(/\b(EMT|EMS|EMR|AEMT|Paramedic|BLS|ALS|CPR|AED|ADA|HIPAA|medical director|protocols|standing orders|quality improvement|patient safety|certification|licensure|emergency medical dispatch|continuous quality improvement|evidence-based medicine|mobile integrated healthcare|community paramedicine)\b/gi)
-    
-    if (medicalTerms) {
-      medicalTerms.forEach(term => keyTerms.add(term.toUpperCase()))
-    }
-    
-    return Array.from(keyTerms).sort()
-  }
-
-  // Content formatting function
-  const formatChapterContent = (content) => {
-    if (!content || typeof content !== 'string') return null
-    
-    const cleanContent = content
-      .replace(/\\n/g, '\n')
-      .replace(/\s+/g, ' ')
-      .trim()
-    
-    const sections = cleanContent.split(/(\d+\.\s+[A-Z][^.]*(?:\s[A-Z][^.]*)*)/g).filter(Boolean)
-    
-    return sections.map((section, index) => {
-      const trimmedSection = section.trim()
-      
-      if (trimmedSection.match(/^\d+\.\s+[A-Z]/)) {
-        return (
-          <div key={index} className="mb-8">
-            <h2 className="text-2xl font-bold mb-6 pb-3 border-b-2" style={{ 
-              color: '#007BFF', 
-              borderColor: '#007BFF' 
-            }}>
-              {trimmedSection}
-            </h2>
-          </div>
-        )
-      }
-      
-      if (trimmedSection.length > 100) {
-        const sentences = trimmedSection.split(/\.\s+/).filter(s => s.trim().length > 0)
-        
-        return (
-          <div key={index} className="mb-8 space-y-4">
-            {sentences.map((sentence, sIndex) => {
-              const cleanSentence = sentence.trim()
-              if (!cleanSentence || cleanSentence.length < 10) return null
-              
-              const finalSentence = cleanSentence.endsWith('.') ? cleanSentence : cleanSentence + '.'
-              
-              const highlightedSentence = finalSentence
-                .replace(/\b(EMT|EMS|EMR|AEMT|Paramedic|BLS|ALS|CPR|AED|ADA|HIPAA)\b/g, 
-                  '<span class="font-semibold" style="color: #007BFF; background-color: #E3F2FD; padding: 2px 4px; border-radius: 4px;">$1</span>')
-                .replace(/\b(medical director|protocols|standing orders|quality improvement|patient safety|certification|licensure|emergency medical dispatch|continuous quality improvement|evidence-based medicine|mobile integrated healthcare|community paramedicine)\b/gi, 
-                  '<span class="font-semibold" style="color: #28A745; background-color: #E8F5E8; padding: 2px 4px; border-radius: 4px;">$1</span>')
-                .replace(/\[(\d+)\]/g, '<sup style="color: #007BFF; font-weight: 600;">[$1]</sup>')
-              
-              return (
-                <p 
-                  key={sIndex} 
-                  className="text-base leading-relaxed mb-3" 
-                  style={{ color: '#212529', lineHeight: '1.8' }}
-                  dangerouslySetInnerHTML={{ __html: highlightedSentence }}
-                />
-              )
-            })}
-          </div>
-        )
-      }
-      
-      return null
-    }).filter(Boolean)
-  }
-
   const renderCurrentPage = () => {
     switch(currentPage) {
       case 'home':
@@ -363,24 +79,10 @@ function Application() {
                   border: '1px solid #E9ECEF',
                   boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
                 }}
-                onClick={() => setCurrentPage('calculators')}
               >
                 <Calculator className="w-12 h-12 mx-auto mb-4" style={{ color: '#28A745' }} />
                 <h3 className="text-xl font-semibold mb-2" style={{ color: '#212529' }}>Calculators</h3>
                 <p style={{ color: '#6C757D' }}>15 field-ready tools</p>
-              </div>
-              <div 
-                className="p-6 rounded-xl text-center transition-all duration-300 hover:scale-105 cursor-pointer"
-                style={{ 
-                  backgroundColor: '#FFFFFF', 
-                  border: '1px solid #E9ECEF',
-                  boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
-                }}
-                onClick={() => setCurrentPage('medications')}
-              >
-                <Pill className="w-12 h-12 mx-auto mb-4" style={{ color: '#6F42C1' }} />
-                <h3 className="text-xl font-semibold mb-2" style={{ color: '#212529' }}>Medications</h3>
-                <p style={{ color: '#6C757D' }}>{medications.length} EMS medications</p>
               </div>
               <div 
                 className="p-6 rounded-xl text-center transition-all duration-300 hover:scale-105"
@@ -389,7 +91,18 @@ function Application() {
                   border: '1px solid #E9ECEF',
                   boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
                 }}
-                onClick={() => setCurrentPage('protocols')}
+              >
+                <Pill className="w-12 h-12 mx-auto mb-4" style={{ color: '#6F42C1' }} />
+                <h3 className="text-xl font-semibold mb-2" style={{ color: '#212529' }}>Medications</h3>
+                <p style={{ color: '#6C757D' }}>100+ EMS medications</p>
+              </div>
+              <div 
+                className="p-6 rounded-xl text-center transition-all duration-300 hover:scale-105"
+                style={{ 
+                  backgroundColor: '#FFFFFF', 
+                  border: '1px solid #E9ECEF',
+                  boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
+                }}
               >
                 <FileText className="w-12 h-12 mx-auto mb-4" style={{ color: '#DC3545' }} />
                 <h3 className="text-xl font-semibold mb-2" style={{ color: '#212529' }}>Protocols</h3>
@@ -398,326 +111,8 @@ function Application() {
             </div>
           </div>
         )
-      case 'medications':
-        if (selectedMedication) {
-          return (
-            <div className="max-w-5xl mx-auto">
-              {/* Navigation */}
-              <div className="mb-6">
-                <button 
-                  onClick={() => setSelectedMedication(null)}
-                  className="text-sm font-medium mb-6 flex items-center hover:underline transition-colors"
-                  style={{ color: '#6F42C1' }}
-                >
-                  <ArrowLeft className="w-4 h-4 mr-1" />
-                  Back to Medications List
-                </button>
-              </div>
-
-              {/* Medication Header */}
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#6F42C1' }}>
-                    <Pill className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h1 className="text-4xl font-bold" style={{ color: '#212529' }}>
-                      {selectedMedication.name}
-                    </h1>
-                    <p className="text-lg italic" style={{ color: '#6C757D' }}>
-                      {selectedMedication.classification} • {selectedMedication.scope}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Medication Details */}
-              <div className="space-y-6">
-                {/* Basic Information */}
-                <section 
-                  className="p-6 rounded-xl"
-                  style={{ 
-                    backgroundColor: '#FFFFFF', 
-                    border: '1px solid #E9ECEF',
-                    boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
-                  }}
-                >
-                  <h2 className="text-xl font-bold mb-4" style={{ color: '#6F42C1' }}>Basic Information</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="font-semibold" style={{ color: '#212529' }}>Generic Name:</p>
-                      <p style={{ color: '#6C757D' }}>{selectedMedication.genericName}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold" style={{ color: '#212529' }}>Brand Names:</p>
-                      <p style={{ color: '#6C757D' }}>{selectedMedication.brandNames.join(', ')}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold" style={{ color: '#212529' }}>Classification:</p>
-                      <p style={{ color: '#6C757D' }}>{selectedMedication.classification}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold" style={{ color: '#212529' }}>Scope of Practice:</p>
-                      <span className="px-3 py-1 rounded-full text-sm font-medium" style={{ 
-                        backgroundColor: selectedMedication.scope === 'EMT-B' ? '#007BFF' : '#6F42C1', 
-                        color: '#FFFFFF' 
-                      }}>
-                        {selectedMedication.scope}
-                      </span>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Mechanism of Action */}
-                <section 
-                  className="p-6 rounded-xl"
-                  style={{ 
-                    backgroundColor: '#E3F2FD', 
-                    border: '1px solid #007BFF'
-                  }}
-                >
-                  <h2 className="text-xl font-bold mb-4" style={{ color: '#1565C0' }}>Mechanism of Action</h2>
-                  <p style={{ color: '#1565C0', lineHeight: '1.7' }}>{selectedMedication.mechanism}</p>
-                </section>
-
-                {/* Indications & Contraindications */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#E8F5E8', 
-                      border: '1px solid #28A745'
-                    }}
-                  >
-                    <h2 className="text-xl font-bold mb-4" style={{ color: '#155724' }}>Indications</h2>
-                    <ul className="space-y-2">
-                      {selectedMedication.indications.map((indication, index) => (
-                        <li key={index} className="flex items-center">
-                          <div className="w-2 h-2 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: '#28A745' }}></div>
-                          <span style={{ color: '#155724' }}>{indication}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#FFEBEE', 
-                      border: '1px solid #F44336'
-                    }}
-                  >
-                    <h2 className="text-xl font-bold mb-4" style={{ color: '#C62828' }}>Contraindications</h2>
-                    <ul className="space-y-2">
-                      {selectedMedication.contraindications.map((contraindication, index) => (
-                        <li key={index} className="flex items-center">
-                          <div className="w-2 h-2 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: '#F44336' }}></div>
-                          <span style={{ color: '#C62828' }}>{contraindication}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                </div>
-
-                {/* Dosage Information */}
-                <section 
-                  className="p-6 rounded-xl"
-                  style={{ 
-                    backgroundColor: '#FFF8E1', 
-                    border: '1px solid #FFC107'
-                  }}
-                >
-                  <h2 className="text-xl font-bold mb-4" style={{ color: '#F57F17' }}>Dosage & Administration</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <p className="font-semibold mb-2" style={{ color: '#F57F17' }}>Adult Dose:</p>
-                      <p style={{ color: '#F57F17' }}>{selectedMedication.dosage.adult}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-2" style={{ color: '#F57F17' }}>Pediatric Dose:</p>
-                      <p style={{ color: '#F57F17' }}>{selectedMedication.dosage.pediatric}</p>
-                    </div>
-                    <div>
-                      <p className="font-semibold mb-2" style={{ color: '#F57F17' }}>Route:</p>
-                      <p style={{ color: '#F57F17' }}>{selectedMedication.route.join(', ')}</p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* Additional Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#FFFFFF', 
-                      border: '1px solid #E9ECEF',
-                      boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
-                    }}
-                  >
-                    <h2 className="text-xl font-bold mb-4" style={{ color: '#212529' }}>Onset & Duration</h2>
-                    <p style={{ color: '#212529', lineHeight: '1.7' }}>{selectedMedication.onsetDuration}</p>
-                  </section>
-
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#FFFFFF', 
-                      border: '1px solid #E9ECEF',
-                      boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
-                    }}
-                  >
-                    <h2 className="text-xl font-bold mb-4" style={{ color: '#212529' }}>Side Effects</h2>
-                    <ul className="space-y-1">
-                      {selectedMedication.sideEffects.map((effect, index) => (
-                        <li key={index} className="flex items-center">
-                          <div className="w-2 h-2 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: '#6C757D' }}></div>
-                          <span style={{ color: '#212529' }}>{effect}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                </div>
-
-                {/* Special Considerations */}
-                <section 
-                  className="p-6 rounded-xl"
-                  style={{ 
-                    backgroundColor: '#F3E5F5', 
-                    border: '1px solid #9C27B0'
-                  }}
-                >
-                  <h2 className="text-xl font-bold mb-4" style={{ color: '#6A1B9A' }}>Special Considerations</h2>
-                  <p style={{ color: '#6A1B9A', lineHeight: '1.7' }}>{selectedMedication.considerations}</p>
-                </section>
-
-                {/* Clinical Disclaimer */}
-                <section 
-                  className="p-6 rounded-xl"
-                  style={{ 
-                    backgroundColor: '#FFEBEE', 
-                    border: '1px solid #F44336'
-                  }}
-                >
-                  <div className="flex items-center mb-4">
-                    <AlertCircle className="w-6 h-6 mr-3" style={{ color: '#D32F2F' }} />
-                    <h3 className="text-lg font-semibold" style={{ color: '#D32F2F' }}>Important Clinical Notice</h3>
-                  </div>
-                  <p className="text-sm leading-relaxed" style={{ color: '#D32F2F' }}>
-                    This medication information is for educational purposes only. Always follow your local protocols, medical director guidelines, and scope of practice. Medication administration should only be performed by trained and certified personnel within their authorized scope of practice.
-                  </p>
-                </section>
-              </div>
-            </div>
-          )
-        }
-
-        return (
-          <div className="max-w-6xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-4" style={{ color: '#212529' }}>EMS Medications</h1>
-              <p style={{ color: '#6C757D' }}>Comprehensive medication reference for emergency medical services</p>
-            </div>
-
-            {/* Search and Filter Controls */}
-            <div className="mb-6 flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#6C757D' }} />
-                <input
-                  type="text"
-                  placeholder="Search medications, classifications, or indications..."
-                  value={medicationSearch}
-                  onChange={(e) => setMedicationSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border"
-                  style={{ 
-                    borderColor: '#E9ECEF',
-                    backgroundColor: '#FFFFFF'
-                  }}
-                />
-              </div>
-              <div className="relative">
-                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#6C757D' }} />
-                <select
-                  value={medicationFilter}
-                  onChange={(e) => setMedicationFilter(e.target.value)}
-                  className="pl-10 pr-8 py-3 rounded-lg border appearance-none"
-                  style={{ 
-                    borderColor: '#E9ECEF',
-                    backgroundColor: '#FFFFFF'
-                  }}
-                >
-                  <option value="all">All Scopes</option>
-                  <option value="EMT-B">EMT-B</option>
-                  <option value="AEMT">AEMT</option>
-                  <option value="Paramedic">Paramedic</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Medications Grid */}
-            <div className="grid gap-4">
-              {filteredMedications.map((medication) => (
-                <div 
-                  key={medication.id}
-                  className="p-6 rounded-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer group"
-                  style={{ 
-                    backgroundColor: '#FFFFFF', 
-                    border: '1px solid #E9ECEF',
-                    boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
-                  }}
-                  onClick={() => setSelectedMedication(medication)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <div 
-                        className="w-12 h-12 rounded-xl flex items-center justify-center mr-4"
-                        style={{ backgroundColor: '#6F42C1' }}
-                      >
-                        <Pill className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-xl font-semibold" style={{ color: '#212529' }}>
-                            {medication.name}
-                          </h3>
-                          <span 
-                            className="px-2 py-1 rounded-full text-xs font-medium"
-                            style={{ 
-                              backgroundColor: medication.scope === 'EMT-B' ? '#007BFF' : '#6F42C1', 
-                              color: '#FFFFFF' 
-                            }}
-                          >
-                            {medication.scope}
-                          </span>
-                        </div>
-                        <p className="text-sm mb-2" style={{ color: '#6C757D' }}>
-                          {medication.classification} • {medication.brandNames.join(', ')}
-                        </p>
-                        <p className="text-sm" style={{ color: '#6C757D' }}>
-                          Primary indications: {medication.indications.slice(0, 3).join(', ')}
-                        </p>
-                      </div>
-                    </div>
-                    <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-purple-500 transition-colors" />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filteredMedications.length === 0 && (
-              <div className="text-center py-12">
-                <Pill className="w-16 h-16 mx-auto mb-4" style={{ color: '#6C757D' }} />
-                <h3 className="text-xl font-semibold mb-2" style={{ color: '#212529' }}>No Medications Found</h3>
-                <p style={{ color: '#6C757D' }}>
-                  Try adjusting your search terms or filter criteria
-                </p>
-              </div>
-            )}
-          </div>
-        )
       case 'notes':
         if (selectedChapter) {
-          const keyTerms = extractKeyTerms(selectedChapter.content)
-          
           return (
             <div className="max-w-5xl mx-auto">
               {/* Navigation */}
@@ -740,10 +135,10 @@ function Application() {
                   </div>
                   <div>
                     <h1 className="text-4xl font-bold" style={{ color: '#212529' }}>
-                      {selectedChapter.title || selectedChapter.name || 'Chapter 1: EMS Systems'}
+                      Chapter 1: EMS Systems
                     </h1>
                     <p className="text-lg italic" style={{ color: '#6C757D' }}>
-                      Professional EMT Education Content
+                      Academy Tier – Overview
                     </p>
                   </div>
                 </div>
@@ -751,119 +146,7 @@ function Application() {
 
               {/* Chapter Content */}
               <div className="space-y-8">
-                {/* Chapter Summary */}
-                {selectedChapter.summary && (
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#E3F2FD', 
-                      border: '1px solid #007BFF'
-                    }}
-                  >
-                    <div className="flex items-center mb-4">
-                      <span className="text-2xl mr-3">📘</span>
-                      <h2 className="text-xl font-bold" style={{ color: '#1565C0' }}>Chapter Overview</h2>
-                    </div>
-                    <p className="text-base leading-relaxed" style={{ color: '#1565C0', lineHeight: '1.7' }}>
-                      {selectedChapter.summary}
-                    </p>
-                  </section>
-                )}
-
-                {/* Learning Objectives */}
-                {selectedChapter.objectives && selectedChapter.objectives.length > 0 && (
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#FFFFFF', 
-                      border: '1px solid #E9ECEF',
-                      boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
-                    }}
-                  >
-                    <div className="flex items-center mb-4">
-                      <span className="text-2xl mr-3">🎯</span>
-                      <h2 className="text-2xl font-bold" style={{ color: '#007BFF' }}>Learning Objectives</h2>
-                    </div>
-                    <div className="space-y-3">
-                      {selectedChapter.objectives.map((objective, index) => (
-                        <div key={index} className="flex items-start p-3 rounded-lg" style={{ backgroundColor: '#F8F9FA' }}>
-                          <div className="w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0" style={{ backgroundColor: '#28A745' }}>
-                            <span className="text-white text-xs font-bold">{index + 1}</span>
-                          </div>
-                          <span style={{ color: '#212529', lineHeight: '1.6' }}>{objective}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Main Chapter Content */}
-                <section 
-                  className="p-8 rounded-xl"
-                  style={{ 
-                    backgroundColor: '#FFFFFF', 
-                    border: '1px solid #E9ECEF',
-                    boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
-                  }}
-                >
-                  <div className="flex items-center mb-6">
-                    <span className="text-2xl mr-3">📚</span>
-                    <h2 className="text-2xl font-bold" style={{ color: '#007BFF' }}>Chapter Content</h2>
-                  </div>
-                  <div className="prose prose-lg max-w-none">
-                    {formatChapterContent(selectedChapter.content)}
-                  </div>
-                </section>
-
-                {/* Key Points */}
-                {selectedChapter.keyPoints && selectedChapter.keyPoints.length > 0 && (
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#FFF8E1', 
-                      border: '1px solid #FFC107'
-                    }}
-                  >
-                    <div className="flex items-center mb-4">
-                      <span className="text-2xl mr-3">⭐</span>
-                      <h2 className="text-xl font-bold" style={{ color: '#856404' }}>Key Points to Remember</h2>
-                    </div>
-                    <div className="space-y-3">
-                      {selectedChapter.keyPoints.map((point, index) => (
-                        <div key={index} className="flex items-start p-3 rounded-lg" style={{ backgroundColor: '#FFFFFF' }}>
-                          <div className="w-2 h-2 rounded-full mr-4 mt-3 flex-shrink-0" style={{ backgroundColor: '#FFC107' }}></div>
-                          <p style={{ color: '#856404', lineHeight: '1.6' }}>{point}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Study Tips */}
-                {selectedChapter.studyTips && selectedChapter.studyTips.length > 0 && (
-                  <section 
-                    className="p-6 rounded-xl"
-                    style={{ 
-                      backgroundColor: '#F3E5F5', 
-                      border: '1px solid #9C27B0'
-                    }}
-                  >
-                    <div className="flex items-center mb-4">
-                      <span className="text-2xl mr-3">💡</span>
-                      <h2 className="text-xl font-bold" style={{ color: '#6A1B9A' }}>Study Tips & Memory Aids</h2>
-                    </div>
-                    <div className="space-y-3">
-                      {selectedChapter.studyTips.map((tip, index) => (
-                        <div key={index} className="flex items-start p-3 rounded-lg" style={{ backgroundColor: '#FFFFFF' }}>
-                          <div className="w-2 h-2 rounded-full mr-4 mt-3 flex-shrink-0" style={{ backgroundColor: '#9C27B0' }}></div>
-                          <p style={{ color: '#6A1B9A', lineHeight: '1.6' }}>{tip}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Source Reference */}
+                {/* Introduction Section */}
                 <section 
                   className="p-6 rounded-xl"
                   style={{ 
@@ -873,18 +156,215 @@ function Application() {
                   }}
                 >
                   <div className="flex items-center mb-4">
-                    <span className="text-2xl mr-3">📖</span>
-                    <h2 className="text-xl font-bold" style={{ color: '#007BFF' }}>Source Reference</h2>
+                    <span className="text-2xl mr-3">📘</span>
+                    <h2 className="text-2xl font-bold" style={{ color: '#007BFF' }}>Introduction</h2>
                   </div>
-                  <p className="text-base" style={{ color: '#212529', lineHeight: '1.7' }}>
-                    Content adapted from: <strong>Emergency Care and Transportation of the Sick and Injured, 12th Edition</strong> - 
-                    The authoritative resource for EMT education and emergency medical services.
+                  <p className="text-base leading-relaxed mb-4" style={{ color: '#212529', lineHeight: '1.7' }}>
+                    <span className="font-semibold" style={{ color: '#007BFF', backgroundColor: '#E3F2FD', padding: '2px 4px', borderRadius: '4px' }}>EMS</span> is a coordinated system of emergency medical care providers, governed by state laws, tasked with rapid response, patient stabilization, and transport. This chapter introduces key functions, history, and operational structures.
                   </p>
+                  <ul className="space-y-2">
+                    <li className="flex items-start">
+                      <div className="w-2 h-2 rounded-full mr-3 mt-2 flex-shrink-0" style={{ backgroundColor: '#007BFF' }}></div>
+                      <span style={{ color: '#212529' }}>
+                        <span className="font-semibold" style={{ color: '#007BFF', backgroundColor: '#E3F2FD', padding: '2px 4px', borderRadius: '4px' }}>EMS</span> is defined as a <strong>system</strong>, not just a service.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="w-2 h-2 rounded-full mr-3 mt-2 flex-shrink-0" style={{ backgroundColor: '#007BFF' }}></div>
+                      <span style={{ color: '#212529' }}>
+                        It involves teams delivering <strong>emergency care and transportation</strong>.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="w-2 h-2 rounded-full mr-3 mt-2 flex-shrink-0" style={{ backgroundColor: '#007BFF' }}></div>
+                      <span style={{ color: '#212529' }}>
+                        <span className="font-semibold" style={{ color: '#007BFF', backgroundColor: '#E3F2FD', padding: '2px 4px', borderRadius: '4px' }}>EMTs</span> function within a legal and medical framework.
+                      </span>
+                    </li>
+                    <li className="flex items-start">
+                      <div className="w-2 h-2 rounded-full mr-3 mt-2 flex-shrink-0" style={{ backgroundColor: '#007BFF' }}></div>
+                      <span style={{ color: '#212529' }}>
+                        State laws define <span className="font-semibold" style={{ color: '#28A745', backgroundColor: '#E8F5E8', padding: '2px 4px', borderRadius: '4px' }}>EMS scope and protocols</span>.
+                      </span>
+                    </li>
+                  </ul>
                 </section>
 
-                {/* Key Terms Section - AT THE BOTTOM */}
-                {keyTerms.length > 0 && (
-                  <section 
+                {/* Learning Objectives */}
+                <section 
+                  className="p-6 rounded-xl"
+                  style={{ 
+                    backgroundColor: '#FFFFFF', 
+                    border: '1px solid #E9ECEF',
+                    boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
+                  }}
+                >
+                  <div className="flex items-center mb-4">
+                    <span className="text-2xl mr-3">🧠</span>
+                    <h2 className="text-2xl font-bold" style={{ color: '#007BFF' }}>Learning Objectives</h2>
+                  </div>
+                  <p className="text-base mb-4" style={{ color: '#212529' }}>
+                    By the end of this chapter, learners will be able to:
+                  </p>
+                  <div className="space-y-3">
+                    {[
+                      "Describe the history and evolution of EMS in the U.S.",
+                      "Differentiate levels of EMS providers and training scopes.",
+                      "Identify the major components of the EMS system.",
+                      "Recognize the core responsibilities and ethical obligations of EMTs.",
+                      "Understand certification, licensure, and ADA compliance."
+                    ].map((objective, index) => (
+                      <div key={index} className="flex items-start p-3 rounded-lg" style={{ backgroundColor: '#F8F9FA' }}>
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 flex-shrink-0" style={{ backgroundColor: '#28A745' }}>
+                          <span className="text-white text-xs font-bold">{index + 1}</span>
+                        </div>
+                        <span style={{ color: '#212529', lineHeight: '1.6' }}>{objective}</span>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Chapter Modules */}
+                <section 
+                  className="p-6 rounded-xl"
+                  style={{ 
+                    backgroundColor: '#FFFFFF', 
+                    border: '1px solid #E9ECEF',
+                    boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
+                  }}
+                >
+                  <div className="flex items-center mb-4">
+                    <span className="text-2xl mr-3">🧩</span>
+                    <h2 className="text-2xl font-bold" style={{ color: '#007BFF' }}>Chapter Modules</h2>
+                  </div>
+                  <p className="text-base mb-4" style={{ color: '#212529' }}>
+                    Each section below links to deeper modular files.
+                  </p>
+                  
+                  <div className="overflow-hidden rounded-lg border" style={{ borderColor: '#E9ECEF' }}>
+                    <table className="w-full">
+                      <thead style={{ backgroundColor: '#F8F9FA' }}>
+                        <tr>
+                          <th className="px-4 py-3 text-left font-semibold" style={{ color: '#212529' }}>Section</th>
+                          <th className="px-4 py-3 text-left font-semibold" style={{ color: '#212529' }}>Type</th>
+                          <th className="px-4 py-3 text-left font-semibold" style={{ color: '#212529' }}>Linked Files</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {[
+                          { section: "History of EMS", type: "📜 Timeline", files: "history/timeline.md\nhistory/key-documents.md" },
+                          { section: "Levels of EMS Providers", type: "📊 Overview", files: "levels-of-providers/*.md" },
+                          { section: "EMS System Components", type: "⚙️ Breakdown", files: "components/*.md" },
+                          { section: "EMT Roles and Responsibilities", type: "🦺 Practices", files: "roles-and-responsibilities/*.md" },
+                          { section: "Licensure & Certification", type: "📋 Compliance", files: "licensure-and-certification/*.md" },
+                          { section: "Quality Improvement & Safety", type: "🔍 Oversight", files: "quality-and-safety/*.md" },
+                          { section: "Research & Evidence-Based Care", type: "🧪 Decision-Making", files: "research/evidence-based-care.md" }
+                        ].map((row, index) => (
+                          <tr key={index} className="border-t" style={{ borderColor: '#E9ECEF' }}>
+                            <td className="px-4 py-3 font-medium" style={{ color: '#212529' }}>{row.section}</td>
+                            <td className="px-4 py-3" style={{ color: '#6C757D' }}>{row.type}</td>
+                            <td className="px-4 py-3 text-sm" style={{ color: '#007BFF' }}>
+                              {row.files.split('\n').map((file, fileIndex) => (
+                                <div key={fileIndex} className="flex items-center">
+                                  <code className="text-xs px-2 py-1 rounded" style={{ backgroundColor: '#F8F9FA', color: '#6C757D' }}>
+                                    {file}
+                                  </code>
+                                </div>
+                              ))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+
+                {/* Scope Tags */}
+                <section 
+                  className="p-6 rounded-xl"
+                  style={{ 
+                    backgroundColor: '#E3F2FD', 
+                    border: '1px solid #007BFF'
+                  }}
+                >
+                  <div className="flex items-center mb-4">
+                    <span className="text-2xl mr-3">🧠</span>
+                    <h2 className="text-xl font-bold" style={{ color: '#1565C0' }}>Scope Tags</h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: '#007BFF', color: '#FFFFFF' }}>
+                      Academy Tier
+                    </span>
+                    <span className="px-3 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: '#FFFFFF', color: '#1565C0', border: '1px solid #007BFF' }}>
+                      Suitable for: EMR, EMT, AEMT (review), Instructor-led foundations
+                    </span>
+                  </div>
+                </section>
+
+                {/* Quick Links Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Flashcard Sets */}
+                  <div 
+                    className="p-6 rounded-xl"
+                    style={{ 
+                      backgroundColor: '#FFF8E1', 
+                      border: '1px solid #FFC107'
+                    }}
+                  >
+                    <div className="flex items-center mb-4">
+                      <span className="text-2xl mr-3">📎</span>
+                      <h3 className="text-lg font-bold" style={{ color: '#856404' }}>Flashcard Sets</h3>
+                    </div>
+                    <p className="text-sm mb-3" style={{ color: '#856404' }}>
+                      Flashcards for this chapter are broken out by learning objective:
+                    </p>
+                    <ul className="space-y-1 text-sm">
+                      <li style={{ color: '#856404' }}>• 01a-history.yaml</li>
+                      <li style={{ color: '#856404' }}>• 01b-levels.yaml</li>
+                      <li style={{ color: '#856404' }}>• 01c-components.yaml</li>
+                    </ul>
+                  </div>
+
+                  {/* Quiz Modules */}
+                  <div 
+                    className="p-6 rounded-xl"
+                    style={{ 
+                      backgroundColor: '#F3E5F5', 
+                      border: '1px solid #9C27B0'
+                    }}
+                  >
+                    <div className="flex items-center mb-4">
+                      <span className="text-2xl mr-3">📝</span>
+                      <h3 className="text-lg font-bold" style={{ color: '#6A1B9A' }}>Quiz Modules</h3>
+                    </div>
+                    <div className="overflow-hidden rounded-lg border" style={{ borderColor: '#9C27B0' }}>
+                      <table className="w-full text-sm">
+                        <thead style={{ backgroundColor: '#6A1B9A' }}>
+                          <tr>
+                            <th className="px-3 py-2 text-left text-white font-medium">Difficulty</th>
+                            <th className="px-3 py-2 text-left text-white font-medium">File Name</th>
+                          </tr>
+                        </thead>
+                        <tbody style={{ backgroundColor: '#FFFFFF' }}>
+                          <tr className="border-t" style={{ borderColor: '#E1BEE7' }}>
+                            <td className="px-3 py-2" style={{ color: '#6A1B9A' }}>Easy</td>
+                            <td className="px-3 py-2" style={{ color: '#6A1B9A' }}>quiz-easy.json</td>
+                          </tr>
+                          <tr className="border-t" style={{ borderColor: '#E1BEE7' }}>
+                            <td className="px-3 py-2" style={{ color: '#6A1B9A' }}>Standard</td>
+                            <td className="px-3 py-2" style={{ color: '#6A1B9A' }}>quiz-standard.json</td>
+                          </tr>
+                          <tr className="border-t" style={{ borderColor: '#E1BEE7' }}>
+                            <td className="px-3 py-2" style={{ color: '#6A1B9A' }}>Advanced</td>
+                            <td className="px-3 py-2" style={{ color: '#6A1B9A' }}>quiz-advanced.json</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Cross-References */}
+                  <div 
                     className="p-6 rounded-xl"
                     style={{ 
                       backgroundColor: '#E8F5E8', 
@@ -892,19 +372,53 @@ function Application() {
                     }}
                   >
                     <div className="flex items-center mb-4">
-                      <span className="text-2xl mr-3">🔑</span>
-                      <h2 className="text-xl font-bold" style={{ color: '#155724' }}>Key Terms</h2>
+                      <span className="text-2xl mr-3">🔗</span>
+                      <h3 className="text-lg font-bold" style={{ color: '#155724' }}>Cross-References</h3>
                     </div>
-                    <ul className="space-y-2">
-                      {keyTerms.map((term, index) => (
-                        <li key={index} className="flex items-center">
-                          <div className="w-2 h-2 rounded-full mr-3 flex-shrink-0" style={{ backgroundColor: '#28A745' }}></div>
-                          <span className="text-base font-medium" style={{ color: '#155724' }}>{term}</span>
-                        </li>
-                      ))}
+                    <p className="text-sm mb-3" style={{ color: '#155724' }}>
+                      Tagged for integration with:
+                    </p>
+                    <ul className="space-y-1 text-sm">
+                      <li style={{ color: '#155724' }}>• Medication guides (standing orders, scope by level)</li>
+                      <li style={{ color: '#155724' }}>• Protocol systems (medical direction, MIH)</li>
+                      <li style={{ color: '#155724' }}>• Scenarios (ethics, quality improvement, patient safety)</li>
                     </ul>
-                  </section>
-                )}
+                  </div>
+                </div>
+
+                {/* References */}
+                <section 
+                  className="p-6 rounded-xl"
+                  style={{ 
+                    backgroundColor: '#FFFFFF', 
+                    border: '1px solid #E9ECEF',
+                    boxShadow: '0 2px 8px rgba(0, 123, 255, 0.08)'
+                  }}
+                >
+                  <div className="flex items-center mb-4">
+                    <span className="text-2xl mr-3">🔍</span>
+                    <h2 className="text-2xl font-bold" style={{ color: '#007BFF' }}>References</h2>
+                  </div>
+                  <p className="text-base" style={{ color: '#212529', lineHeight: '1.7' }}>
+                    All citations and sources used in this module are listed in <code className="px-2 py-1 rounded text-sm" style={{ backgroundColor: '#F8F9FA', color: '#6C757D' }}>references.json</code>, with glossary links in app for quick lookup.
+                  </p>
+                </section>
+
+                {/* Action Footer */}
+                <section 
+                  className="p-6 rounded-xl text-center"
+                  style={{ 
+                    backgroundColor: '#F8F9FA', 
+                    border: '1px solid #E9ECEF'
+                  }}
+                >
+                  <p className="text-lg mb-4" style={{ color: '#212529' }}>
+                    Want me to auto-generate the full text for <code className="px-2 py-1 rounded text-sm" style={{ backgroundColor: '#FFFFFF', color: '#6C757D' }}>history/timeline.md</code> or begin flashcard generation?
+                  </p>
+                  <p className="text-base" style={{ color: '#6C757D' }}>
+                    We can tackle one module at a time or spin up the entire folder set. Let's build it layer by layer.
+                  </p>
+                </section>
 
                 {/* Clinical Disclaimer */}
                 <section 
@@ -931,7 +445,7 @@ function Application() {
           <div className="max-w-6xl mx-auto">
             <div className="mb-8">
               <h1 className="text-3xl font-bold mb-4" style={{ color: '#212529' }}>Study Notes</h1>
-              <p style={{ color: '#6C757D' }}>Professional EMT education materials from Emergency Care and Transportation of the Sick and Injured, 12th Edition</p>
+              <p style={{ color: '#6C757D' }}>Professional EMT education materials organized by chapter</p>
             </div>
 
             {loading ? (
@@ -970,16 +484,11 @@ function Application() {
                             </div>
                           )}
                           <h3 className="text-xl font-semibold mb-1" style={{ color: '#212529' }}>
-                            {chapter.title || chapter.name || `Chapter ${index + 1}`}
+                            Chapter 1: EMS Systems
                           </h3>
                           <p className="text-sm" style={{ color: '#6C757D' }}>
-                            Professional EMT education content • Click to study
+                            Academy Tier – Foundation concepts for EMT practice
                           </p>
-                          {chapter.summary && (
-                            <p className="text-sm mt-1 line-clamp-2" style={{ color: '#6C757D' }}>
-                              {chapter.summary.substring(0, 120)}...
-                            </p>
-                          )}
                         </div>
                       </div>
                       <ChevronRight className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" />
